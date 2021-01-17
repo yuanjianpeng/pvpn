@@ -1,0 +1,102 @@
+PVPN
+
+This is a tiny VPN using TUN and UDP like OpenVPN.
+But it's very easy to use, We can fast deploy a VPN
+Author: Yuan Jianpeng <yuanjp89@163.com>
+2020
+
+
+build
+=========
+$ make -C <pvpn source path>
+or
+$ cd <pvpn source path>
+$ make
+
+the build temporary file are created into `obj' subdirectory.
+the build executable `pvpn' is created at source root dir
+
+
+install
+========
+
+install client:
+$ sudo cp pvpn /usr/sbin
+$ sudo mkdir /etc/pvpn
+$ sudo cp client.conf /etc/pvpn
+
+You must edit client.conf to change to your config
+
+install server:
+$ sudo cp pvpn /usr/sbin
+$ sudo mkdir /etc/pvpn
+$ sudo cp server.conf /etc/pvpn
+
+you may want to edit server.conf to change the config
+
+run
+======
+
+the client and server is bundled into a single binary pvpn
+
+run client
+$ sudo pvpn client [options]
+
+run server
+$ sudo pvpn server [options]
+
+check status
+$ sudo pvpn status
+
+stop pvpn
+$ sudo pvpn stop
+
+options:
+-D, don't run as daemon
+-p <pidfile>, save pid to a file, default is /etc/pvpn/pvpn.pid
+-P, don't save pid
+-v, verbose output, commonly used with -D to debug pvpn
+
+config
+======
+
+client config:
+
+---
+dev tun1
+mtu 1458
+server xxx.org
+port 8011
+password abcdefg
+dns_up echo nameserver $dns | /sbin/resolvconf -a tun1.pvpn
+dns_down /sbin/resolvconf -d tun1.pvpn
+---
+
+dev: the ifname of tun device
+mtu: mtu of tun device
+server: server of pvpn, domain or ip.
+port: UDP tunnel port of server
+password: a password used to encrypt the packet, client and server's password should be same
+dns_up: when client dial ok execute this command to enable DNS
+dns_down: when client exit, execute this command to disable DNS
+
+Note:
+dns_up and dns_down a Distribution related, the default setting
+is only tested in Ubuntu 20
+
+server config:
+
+---
+dev tun1
+port 8011
+subnet 10.0.0.0
+prefix 24
+dns 8.8.8.8
+password abcdefg
+---
+
+subnet: VPN Subnet
+prefix: subnet prefix of vpn
+dns: dns address allocated to client
+
+
